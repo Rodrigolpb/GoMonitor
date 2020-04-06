@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -12,8 +13,9 @@ import (
 )
 
 func main() {
-	const monitorings = 5
-	const interval = 5
+	monitorings := 10
+	interval := 2
+
 	version := "1.0"
 	getSitesFromFile()
 
@@ -25,6 +27,12 @@ func main() {
 		case 2:
 			showLogs()
 		case 3:
+			config := map[string]int{
+				"Number of Monitorings": monitorings,
+				"Interval (Minutes)":    interval,
+			}
+			printConfiguration(config)
+		case 4:
 			exitProgram(false)
 		default:
 			fmt.Println("Invalid option. Please, try again...")
@@ -40,7 +48,8 @@ func readMenuOption(version string) int {
 	fmt.Println("Menu - Choose an option")
 	fmt.Println("1 - Start Monitoring")
 	fmt.Println("2 - Show Logs")
-	fmt.Println("3 - Exit")
+	fmt.Println("3 - Show Configurations")
+	fmt.Println("4 - Exit")
 	fmt.Println("@Version ", version)
 	fmt.Print("Chose option: ")
 	fmt.Scan(&cmdOption)
@@ -49,7 +58,7 @@ func readMenuOption(version string) int {
 	return cmdOption
 }
 
-func startMonitoring(monitorings int, interval float32) {
+func startMonitoring(monitorings int, interval int) {
 	sites := getSitesFromFile()
 
 	fmt.Println("Started Monitoring...")
@@ -59,7 +68,7 @@ func startMonitoring(monitorings int, interval float32) {
 			fmt.Printf("> Test Sites[%d] - ", i)
 			testSite(site)
 		}
-		time.Sleep(time.Duration(interval) * time.Second)
+		time.Sleep(time.Duration(interval) * time.Minute)
 	}
 }
 
@@ -107,7 +116,8 @@ func getSitesFromFile() []string {
 }
 
 func registerLogs(site string, isRunning bool) {
-	file, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	filePath := "logs/log" + time.Now().Format("02-01-2006") + ".txt"
+	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
 	if err != nil {
 		fmt.Println(err)
@@ -119,8 +129,17 @@ func registerLogs(site string, isRunning bool) {
 }
 
 func showLogs() {
-	fmt.Println("TODO: Show Logs...")
+	filePath := "logs/log" + time.Now().Format("02-01-2006") + ".txt"
+	file, err := ioutil.ReadFile(filePath)
+
+	if err != nil {
+		fmt.Println(err)
+		exitProgram(false)
+	}
+
+	fmt.Println("Logs from file:", filePath)
 	fmt.Println()
+	fmt.Println(string(file))
 }
 
 func exitProgram(hasError bool) {
@@ -129,4 +148,10 @@ func exitProgram(hasError bool) {
 		os.Exit(-1)
 	}
 	os.Exit(0)
+}
+
+func printConfiguration(configurations map[string]int) {
+	for i, config := range configurations {
+		fmt.Println(i, ": ", config)
+	}
 }
