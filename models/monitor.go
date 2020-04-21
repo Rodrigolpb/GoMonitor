@@ -15,7 +15,7 @@ type Monitor struct {
 func (m *Monitor) Start() {
 	for {
 		logRegister := m.testURL()
-		logRegister.Save()
+		logRegister.save()
 		time.Sleep(m.IntervalMinutes)
 	}
 }

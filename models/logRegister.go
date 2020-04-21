@@ -16,8 +16,8 @@ type logRegister struct {
 
 const basicFilePath = "logs/log_"
 
-//Save - save log content into text file
-func (l *logRegister) Save() {
+//save - save log content into text file
+func (l *logRegister) save() {
 	filePath := basicFilePath + time.Now().Format("02-01-2006") + ".txt"
 	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
