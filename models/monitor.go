@@ -5,31 +5,29 @@ import (
 	"time"
 )
 
-//Monitor defines a new URL to be monitored and the interval
+//Monitor - defines a new URL to be monitored and the interval
 type Monitor struct {
-	ID              int32
 	URL             string
-	IntervalMinutes int32
+	IntervalMinutes time.Duration
 }
 
 //Start - Method to start sending requests to the monitor's URL
 func (m *Monitor) Start() {
 	for {
-		log := m.testURL()
-		log.Save()
-		time.Sleep(time.Duration(m.IntervalMinutes) * time.Minute)
+		logRegister := m.testURL()
+		logRegister.Save()
+		time.Sleep(m.IntervalMinutes)
 	}
 }
 
-func (m *Monitor) testURL() *Log {
+func (m *Monitor) testURL() *logRegister {
 	startRequest := time.Now()
-	resp, err := http.Get(m.URL)
-	log := Log{
+	resp, _ := http.Get(m.URL)
+	logRegister := logRegister{
 		url:          m.URL,
 		date:         time.Now(),
 		statusCode:   *&resp.StatusCode,
-		err:          err,
 		responseTime: time.Since(startRequest),
 	}
-	return &log
+	return &logRegister
 }
