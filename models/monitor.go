@@ -7,16 +7,20 @@ import (
 
 //Monitor - defines a new URL to be monitored and the interval
 type Monitor struct {
-	URL             string
-	IntervalMinutes time.Duration
+	URL            string
+	IntervalTime   time.Duration
+	MaxResposeTime time.Duration
 }
 
 //Start - Method to start sending requests to the monitor's URL
-func (m *Monitor) Start() {
+func (m *Monitor) Start(ch chan<- string) {
 	for {
 		logRegister := m.testURL()
 		logRegister.save()
-		time.Sleep(m.IntervalMinutes)
+		if logRegister.responseTime > m.MaxResposeTime || logRegister.statusCode != 200 {
+			ch <- logRegister.String()
+		}
+		time.Sleep(m.IntervalTime)
 	}
 }
 
